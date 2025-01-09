@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Prefetch Extension",
+  "version": "1.0",
+  "description": "An extension for intelligent link prefetching.",
+  "icons": {
+    "16": "icons/appico16.png",
+    "48": "icons/appico48.png",
+    "128": "icons/appico128.png"
+  },
+  "permissions": [ "storage" ],
+  "host_permissions": ["<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "enum.js",
+        "prefetch_manager.js",
+        "prefetch_ui.js",
+        "settings.js",
+        "content.js"
+      ]
+    }
+  ],
+  "options_page": "options.html"
+}

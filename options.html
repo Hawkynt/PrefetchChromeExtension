@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prefetch Extension Options</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 10px 15px;
+      align-items: center;
+    }
+
+    fieldset {
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    fieldset legend {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    fieldset > .grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 10px 15px;
+      align-items: center;
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+    }
+
+    input[type="number"] {
+      width: 48px;
+    }
+
+    .help-icon {
+      margin-left: 5px;
+      color: #0078d7;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .help-icon:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      background: #333;
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 5px;
+      white-space: nowrap;
+      z-index: 10;
+      font-size: 12px;
+    }
+
+    button {
+      grid-column: span 2;
+      background-color: #0078d7;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .status-message {
+      grid-column: span 2;
+      padding: 10px;
+      border-radius: 5px;
+      background-color: #d4edda; /* Light green background */
+      color: #155724;          /* Dark green text */
+      text-align: center;
+      font-weight: bold;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    .status-message.visible {
+      opacity: 1;
+    }
+  </style>
+  <script src="./settings.js"></script>
+</head>
+<body>
+  <h1>Prefetch Extension Options</h1>
+  <form id="settingsForm">
+    <fieldset>
+      <legend>Logic</legend>
+      <div class="grid">
+        <label for="startAfterLoad">Wait For Page Load:</label>
+        <div>
+          <input type="checkbox" id="startAfterLoad" />
+          <span class="help-icon" data-tooltip="Prefetching will start only after the page fully loads.">?</span>
+        </div>
+
+        <label for="avoidSlowConnections">Avoid Slow Connections:</label>
+        <div>
+          <input type="checkbox" id="avoidSlowConnections" />
+          <span class="help-icon" data-tooltip="Prefetching will be disabled on slow networks (e.g., 2G).">?</span>
+        </div>
+
+        <label for="avoidDataSaver">Avoid Data Saver Mode:</label>
+        <div>
+          <input type="checkbox" id="avoidDataSaver" />
+          <span class="help-icon" data-tooltip="Prefetching will be disabled when the browser's data saver mode is active.">?</span>
+        </div>
+
+        <label for="maxConcurrentPrefetchers">Max Concurrent Prefetchers:</label>
+        <div>
+          <input type="number" id="maxConcurrentPrefetchers" min="1" value="2" />
+          <span class="help-icon" data-tooltip="Set the maximum number of concurrent prefetch tasks.">?</span>
+        </div>
+
+        <label for="scanInterval">Scan Interval (ms):</label>
+        <div>
+          <input type="number" id="scanInterval" min="1000" value="3000" />
+          <span class="help-icon" data-tooltip="Interval for scanning new links in milliseconds.">?</span>
+        </div>
+        
+        <label for="allowQueryPrefetch">Allow Prefetching Query Links:</label>
+        <div>
+          <input type="checkbox" id="allowQueryPrefetch" />
+          <span class="help-icon" data-tooltip="Allow prefetching links with query parameters (e.g., ?key=value).">?</span>
+        </div>
+        
+        <label for="enableMethodDns">Enable DNS Prefetch:</label>
+        <div>
+          <input type="checkbox" id="enableMethodDns" />
+          <span class="help-icon" data-tooltip="Perform DNS resolution in advance to reduce latency.">?</span>
+        </div>
+
+        <label for="enableMethodPrefetch">Enable `Prefetch`-Method:</label>
+        <div>
+          <input type="checkbox" id="enableMethodPrefetch" />
+          <span class="help-icon" data-tooltip="Prefetch resources likely to be needed soon.">?</span>
+        </div>
+
+        <label for="enableMethodPreload">Enable `Preload`-Method:</label>
+        <div>
+          <input type="checkbox" id="enableMethodPreload" />
+          <span class="help-icon" data-tooltip="Preload high-priority resources for the current page.">?</span>
+        </div>
+
+        <label for="enableMethodPreconnect">Enable `Preconnect`-Method:</label>
+        <div>
+          <input type="checkbox" id="enableMethodPreconnect" />
+          <span class="help-icon" data-tooltip="Preconnect to important third-party origins.">?</span>
+        </div>
+        
+        <label for="enableMethodModulepreload">Enable `Module-Preload`-Method:</label>
+        <div>
+          <input type="checkbox" id="enableMethodModulepreload" />
+          <span class="help-icon" data-tooltip="Preload javascript modules for the current page.">?</span>
+        </div>
+        
+        <label for="enableSpeculationRules">Enable Speculation Rules:</label>
+        <div>
+          <input type="checkbox" id="enableSpeculationRules" />
+          <span class="help-icon" data-tooltip="Use browser speculation rules for prefetching or prerendering.">?</span>
+        </div>
+        
+        <label for="boostInViewportLinks">Boost Priority of In-Viewport Links:</label>
+        <div>
+          <input type="checkbox" id="boostInViewportLinks" />
+          <span class="help-icon" data-tooltip="Automatically increase priority for links that are visible on the screen.">?</span>
+        </div>
+
+        <label for="boostMouseOverLinks">Boost Priority of Mouse-Over Links:</label>
+        <div>
+          <input type="checkbox" id="boostMouseOverLinks" />
+          <span class="help-icon" data-tooltip="Automatically increase priority for links when the mouse hovers over them.">?</span>
+        </div>
+        
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>UI</legend>
+      <div class="grid">
+        <label for="fadeoutDelay">Fadeout Delay (ms):</label>
+        <div>
+          <input type="number" id="fadeoutDelay" min="100" value="1000" />
+          <span class="help-icon" data-tooltip="Delay before hiding the prefetch items after they have been processed.">?</span>
+        </div>
+      </div>
+      
+      <div class="grid">
+        <label for="fadeoutDelay">Menu Delay (ms):</label>
+        <div>
+          <input type="number" id="menuDelay" min="1000" value="10000" />
+          <span class="help-icon" data-tooltip="Delay before hiding the prefetch table after nothing is changed.">?</span>
+        </div>
+      </div>
+      
+    </fieldset>
+    <div class="grid">
+      <button type="submit">Save Settings</button>
+      <div id="statusMessage" class="status-message"></div>
+    </div>
+  </form>
+  
+  <script src="./options.js"></script>
+</body>
+</html>
