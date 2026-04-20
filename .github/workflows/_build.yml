@@ -1,0 +1,48 @@
+name: Build extension zip
+
+# Packages the extension into a zip suitable for Chrome Web Store upload
+# or manual "Load unpacked" install.
+on:
+  workflow_call:
+    inputs:
+      version: { required: true, type: string }
+      release-kind: { required: true, type: string }
+      changelog-flag: { required: true, type: string }
+      ref: { required: false, type: string, default: "" }
+    outputs:
+      artifact-name:
+        value: ${{ jobs.build.outputs.artifact-name }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      artifact-name: PrefetchChromeExtension-${{ inputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+
+      - name: Update CHANGELOG
+        run: node .github/workflows/scripts/update-changelog.mjs ${{ inputs.changelog-flag }}
+
+      - name: Stamp version into manifest.json
+        run: node .github/workflows/scripts/stamp-manifest.mjs "${{ inputs.version }}"
+
+      - name: Package extension zip
+        run: |
+          v="${{ inputs.version }}"
+          mkdir -p stage
+          # Copy only the files an end user / webstore needs -- exclude repo metadata, tests, etc.
+          cp -r manifest.json *.js *.html icons ReadMe.md LICENSE stage/ 2>/dev/null || true
+          (cd stage && zip -r "../PrefetchChromeExtension-${v}.zip" .)
+          ls -la PrefetchChromeExtension-${v}.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PrefetchChromeExtension-${{ inputs.version }}
+          path: PrefetchChromeExtension-${{ inputs.version }}.zip

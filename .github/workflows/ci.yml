@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_call: {}
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+
+      - name: Validate manifest.json
+        run: node -e "const m = require('./manifest.json'); if (!m.manifest_version || !m.name || !m.version) { throw new Error('manifest.json missing required fields'); } console.log('manifest OK: ' + m.name + ' v' + m.version); "
+
+      - name: JS syntax check (all .js files)
+        run: |
+          set -e
+          for f in *.js; do
+            [ -f "$f" ] || continue
+            node --check "$f"
+          done
+          echo "All JS files parse."
+
+      - name: Version resolves
+        run: |
+          V=$(perl .github/workflows/scripts/version.pl)
+          echo "Resolved version: $V"

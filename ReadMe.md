@@ -1,5 +1,10 @@
 # Prefetch Manager
 
+[![CI](https://github.com/Hawkynt/PrefetchChromeExtension/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Hawkynt/PrefetchChromeExtension/actions/workflows/ci.yml)
+[![Release](https://github.com/Hawkynt/PrefetchChromeExtension/actions/workflows/release.yml/badge.svg)](https://github.com/Hawkynt/PrefetchChromeExtension/actions/workflows/release.yml)
+[![Latest release](https://img.shields.io/github/v/release/Hawkynt/PrefetchChromeExtension?label=release&sort=semver)](https://github.com/Hawkynt/PrefetchChromeExtension/releases/latest)
+[![Latest nightly](https://img.shields.io/github/v/release/Hawkynt/PrefetchChromeExtension?include_prereleases&label=nightly&sort=date)](https://github.com/Hawkynt/PrefetchChromeExtension/releases?q=prerelease%3Atrue)
+
 **Prefetch Manager** is a powerful browser extension designed to optimize web browsing by intelligently prefetching resources like pages, scripts, and assets. It enhances browsing speed, reduces latency, and ensures a smoother user experience.
 
 ## Features
