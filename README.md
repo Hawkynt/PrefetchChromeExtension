@@ -1,9 +1,17 @@
 # Prefetch Manager
 
+[![License](https://img.shields.io/github/license/Hawkynt/PrefetchChromeExtension)](https://github.com/Hawkynt/PrefetchChromeExtension/blob/main/LICENSE)
+[![Language](https://img.shields.io/github/languages/top/Hawkynt/PrefetchChromeExtension?color=8957D5)](https://github.com/Hawkynt/PrefetchChromeExtension)
+
 [![CI](https://github.com/Hawkynt/PrefetchChromeExtension/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Hawkynt/PrefetchChromeExtension/actions/workflows/ci.yml)
-[![Release](https://github.com/Hawkynt/PrefetchChromeExtension/actions/workflows/release.yml/badge.svg)](https://github.com/Hawkynt/PrefetchChromeExtension/actions/workflows/release.yml)
-[![Latest release](https://img.shields.io/github/v/release/Hawkynt/PrefetchChromeExtension?label=release&sort=semver)](https://github.com/Hawkynt/PrefetchChromeExtension/releases/latest)
-[![Latest nightly](https://img.shields.io/github/v/release/Hawkynt/PrefetchChromeExtension?include_prereleases&label=nightly&sort=date)](https://github.com/Hawkynt/PrefetchChromeExtension/releases?q=prerelease%3Atrue)
+![Last Commit](https://img.shields.io/github/last-commit/Hawkynt/PrefetchChromeExtension?branch=main)
+![Activity](https://img.shields.io/github/commit-activity/m/Hawkynt/PrefetchChromeExtension)
+
+[![Stars](https://img.shields.io/github/stars/Hawkynt/PrefetchChromeExtension?color=FFD700)](https://github.com/Hawkynt/PrefetchChromeExtension/stargazers)
+[![Forks](https://img.shields.io/github/forks/Hawkynt/PrefetchChromeExtension?color=008080)](https://github.com/Hawkynt/PrefetchChromeExtension/network/members)
+[![Issues](https://img.shields.io/github/issues/Hawkynt/PrefetchChromeExtension)](https://github.com/Hawkynt/PrefetchChromeExtension/issues)
+![Code Size](https://img.shields.io/github/languages/code-size/Hawkynt/PrefetchChromeExtension?color=4CAF50)
+![Repo Size](https://img.shields.io/github/repo-size/Hawkynt/PrefetchChromeExtension?color=FF9800)
 
 **Prefetch Manager** is a powerful browser extension designed to optimize web browsing by intelligently prefetching resources like pages, scripts, and assets. It enhances browsing speed, reduces latency, and ensures a smoother user experience.
 
