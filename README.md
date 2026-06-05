@@ -13,9 +13,9 @@
 ![Code Size](https://img.shields.io/github/languages/code-size/Hawkynt/PrefetchChromeExtension?color=4CAF50)
 ![Repo Size](https://img.shields.io/github/repo-size/Hawkynt/PrefetchChromeExtension?color=FF9800)
 
-**Prefetch Manager** is a powerful browser extension designed to optimize web browsing by intelligently prefetching resources like pages, scripts, and assets. It enhances browsing speed, reduces latency, and ensures a smoother user experience.
+> A browser extension that speeds up everyday browsing by intelligently prefetching the pages, scripts and assets you are likely to open next — reducing latency without wasting bandwidth on links you'll never click.
 
-## Features
+## ✨ Features
 
 - **Smart Resource Management**: Dynamically prioritizes resources based on real-time user behavior.
 - **Prefetching Methods**:
@@ -29,7 +29,7 @@
 - **Intersection Observer Integration**: Prefetches visible links as they come into the viewport.
 - **Customizable Settings**: Easily configure behaviors like scan intervals, prefetch methods, and connection checks.
 
-## Installation
+## 📦 Installation
 
 1. **Download or Clone the Repository**:
 
@@ -51,6 +51,13 @@
 2. **Queue Management**: The extension manages a priority queue for resources, dynamically updating as user behavior changes.
 3. **Prefetch Execution**: Resources are fetched using appropriate methods, depending on browser capabilities and resource type.
 
-## License
+## ❤️ Support
 
-This project is licensed under the LGPL License. See the `LICENSE` file for details.
+If this project saves you time or money, consider supporting its development:
+
+[![GitHub Sponsors](https://img.shields.io/badge/GitHub-Sponsor-EA4AAA?logo=githubsponsors)](https://github.com/sponsors/Hawkynt)
+[![PayPal](https://img.shields.io/badge/PayPal-Donate-00457C?logo=paypal)](https://www.paypal.me/hawkynt)
+
+## 📜 License
+
+Licensed under LGPL-3.0-or-later — see [LICENSE](LICENSE).
