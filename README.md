@@ -13,6 +13,10 @@
 ![Code Size](https://img.shields.io/github/languages/code-size/Hawkynt/PrefetchChromeExtension?color=4CAF50)
 ![Repo Size](https://img.shields.io/github/repo-size/Hawkynt/PrefetchChromeExtension?color=FF9800)
 
+[![Release](https://img.shields.io/github/v/release/Hawkynt/PrefetchChromeExtension)](https://github.com/Hawkynt/PrefetchChromeExtension/releases/latest)
+[![Nightly](https://img.shields.io/github/v/release/Hawkynt/PrefetchChromeExtension?include_prereleases&sort=date&filter=nightly-*&label=nightly&color=FF9800)](https://github.com/Hawkynt/PrefetchChromeExtension/releases)
+[![Downloads](https://img.shields.io/github/downloads/Hawkynt/PrefetchChromeExtension/total)](https://github.com/Hawkynt/PrefetchChromeExtension/releases)
+
 > A browser extension that speeds up everyday browsing by intelligently prefetching the pages, scripts and assets you are likely to open next — reducing latency without wasting bandwidth on links you'll never click.
 
 ## ✨ Features
