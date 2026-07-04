@@ -51,6 +51,32 @@ const Blacklist = Object.freeze({
     return next;
   },
 
+  /**
+   * Scope choices for disabling a host, from the exact hostname down to
+   * the registrable domain, most specific first. Multi-part public
+   * suffixes (co.uk, com.au, ...) are detected heuristically — two
+   * trailing labels of up to three characters — and never offered as a
+   * scope themselves; when in doubt the list stays more specific rather
+   * than broader. IP addresses and dotless hosts yield a single choice.
+   */
+  scopesFor(hostname) {
+    const host = hostname.toLowerCase();
+    if (host.startsWith("[") || /^[0-9.]+$/.test(host) || !host.includes("."))
+      return [host];
+
+    const labels = host.split(".");
+    const lastLabel = labels[labels.length - 1];
+    const secondLastLabel = labels[labels.length - 2];
+    const suffixLabels = lastLabel.length <= 3 && secondLastLabel.length <= 3 ? 3 : 2;
+    if (labels.length <= suffixLabels)
+      return [host];
+
+    const scopes = [];
+    for (let i = 0; i <= labels.length - suffixLabels; ++i)
+      scopes.push(labels.slice(i).join("."));
+    return scopes;
+  },
+
   /** Drop expired temporary entries; permanent ones stay. */
   purgeExpired(entries, now) {
     const next = {};

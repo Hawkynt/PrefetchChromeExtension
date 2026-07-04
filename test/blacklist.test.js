@@ -55,3 +55,34 @@ describe("blacklist entries", () => {
     assert.equal(Blacklist.expiryFor(null, "example.com"), null);
   });
 });
+
+describe("blacklist scopes", () => {
+  test("given a deep subdomain, when listing scopes, then every level down to the registrable domain is offered", () => {
+    assert.deepEqual(Blacklist.scopesFor("www.shop.example.com"), [
+      "www.shop.example.com",
+      "shop.example.com",
+      "example.com",
+    ]);
+  });
+
+  test("given a bare registrable domain, when listing scopes, then only itself is offered", () => {
+    assert.deepEqual(Blacklist.scopesFor("example.com"), ["example.com"]);
+  });
+
+  test("given a multi-part public suffix, when listing scopes, then the suffix itself is never offered", () => {
+    assert.deepEqual(Blacklist.scopesFor("shop.example.co.uk"), [
+      "shop.example.co.uk",
+      "example.co.uk",
+    ]);
+  });
+
+  test("given IP addresses or dotless hosts, when listing scopes, then only the host itself is offered", () => {
+    assert.deepEqual(Blacklist.scopesFor("192.168.2.1"), ["192.168.2.1"]);
+    assert.deepEqual(Blacklist.scopesFor("[::1]"), ["[::1]"]);
+    assert.deepEqual(Blacklist.scopesFor("localhost"), ["localhost"]);
+  });
+
+  test("given mixed case, when listing scopes, then they are normalized to lower case", () => {
+    assert.deepEqual(Blacklist.scopesFor("WWW.Example.COM"), ["www.example.com", "example.com"]);
+  });
+});

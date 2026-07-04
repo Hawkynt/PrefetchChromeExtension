@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const hostNameDisplay = document.getElementById("hostName");
   const statusDisplay = document.getElementById("status");
   const disableControls = document.getElementById("disableControls");
+  const scopeSelect = document.getElementById("scopeSelect");
   const enableButton = document.getElementById("enableAgain");
 
   await settings.load();
@@ -29,14 +30,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   hostNameDisplay.textContent = hostname;
 
+  // Offer the exact host and every parent domain down to the
+  // registrable one, so blocking can be as narrow or broad as needed.
+  Blacklist.scopesFor(hostname).forEach((scope) => {
+    const option = document.createElement("option");
+    option.value = scope;
+    option.textContent = scope;
+    scopeSelect.appendChild(option);
+  });
+
   const render = () => {
     const entries = settings.data.blacklist || {};
     if (Blacklist.covers(entries, hostname, Date.now())) {
+      const covering = Blacklist.entryFor(entries, hostname);
       const expiry = Blacklist.expiryFor(entries, hostname);
       statusDisplay.textContent =
         expiry === Blacklist.PERMANENT
-          ? "Prefetching is disabled on this site."
-          : `Prefetching is disabled until ${new Date(expiry).toLocaleTimeString()}.`;
+          ? `Prefetching is disabled for ${covering}.`
+          : `Prefetching is disabled for ${covering} until ${new Date(expiry).toLocaleTimeString()}.`;
       disableControls.style.display = "none";
       enableButton.style.display = "";
     } else {
@@ -50,7 +61,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const now = Date.now();
     settings.data.blacklist = Blacklist.add(
       Blacklist.purgeExpired(settings.data.blacklist || {}, now),
-      hostname,
+      scopeSelect.value || hostname,
       durationMs,
       now
     );

@@ -30,7 +30,7 @@
   - Page Prefetch — fetches same-site pages you are likely to open next
   - Speculation Rules — uses the browser's native speculation API for page prefetches when supported, falling back to classic prefetch otherwise
 - **Side-Effect Safety**: Links that look like server actions (logout, add-to-cart, subscribe, like, buy, delete, …) are never prefetched, and neither are `rel="nofollow"`, `download`, `data-no-prefetch`, or non-`http(s)` links — speculative loading can't accidentally trigger anything on your behalf. Forms are never touched at all.
-- **Per-Site Disable & Blacklist**: Click the toolbar icon to disable prefetching on the current domain for 5, 30 or 60 minutes — or permanently. Temporary entries re-enable themselves when they expire; the full blacklist is manageable on the options page and syncs across your browsers. An entry covers the domain and all its subdomains, and changes take effect immediately in open tabs.
+- **Per-Site Disable & Blacklist**: Click the toolbar icon to disable prefetching for 5, 30 or 60 minutes — or permanently. Choose how broadly it applies: just the exact subdomain (`www.shop.example.com`) or any parent domain up to the registrable one (`example.com`, covering all its subdomains). Temporary entries re-enable themselves when they expire; the full blacklist is manageable on the options page and syncs across your browsers. Changes take effect immediately in open tabs.
 - **Mouseover Boosting**: Hovered links (likely clicked next) jump to realtime priority and start prefetching immediately, even when all prefetch slots are busy.
 - **Yields to Navigation**: The moment you click a link, all queued and running prefetches are cancelled so the next page gets the full connection. Modified clicks (new tab/window) and clicks handled by single-page-app routers keep prefetching alive.
 - **Viewport Awareness**: Links entering the viewport are boosted, links scrolling out of view drop back to their previous priority.
@@ -61,9 +61,10 @@
 
 Click the extension icon on any page to open the per-site controls:
 
-- **5 min / 30 min / 60 min**: temporarily disable prefetching for the current domain (and its subdomains); it resumes automatically afterwards.
-- **Forever**: disable the domain permanently.
-- **Re-enable prefetching**: remove the domain from the blacklist again.
+- **Scope**: pick what to disable — the exact subdomain you are on, or a parent domain (which covers all of its subdomains). Public suffixes like `co.uk` are never offered.
+- **5 min / 30 min / 60 min**: temporarily disable prefetching for the chosen scope; it resumes automatically afterwards.
+- **Forever**: disable the chosen scope permanently.
+- **Re-enable prefetching**: remove the covering entry from the blacklist again.
 
 Disabling takes effect immediately — running prefetches are cancelled in all open tabs of that site.
 

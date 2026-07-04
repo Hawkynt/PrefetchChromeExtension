@@ -32,6 +32,14 @@
       flex-wrap: wrap;
     }
 
+    select {
+      width: 100%;
+      margin-bottom: 8px;
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
     button {
       background-color: #0078d7;
       color: #fff;
@@ -61,7 +69,9 @@
   <h1 id="hostName">…</h1>
   <div id="status"></div>
   <div id="disableControls">
-    <div class="label">Disable prefetching here for:</div>
+    <div class="label">Disable prefetching on:</div>
+    <select id="scopeSelect"></select>
+    <div class="label">for:</div>
     <div class="row">
       <button id="disable5">5 min</button>
       <button id="disable30">30 min</button>
