@@ -8,13 +8,21 @@
     "48": "icons/appico48.png",
     "128": "icons/appico128.png"
   },
-  "permissions": [ "storage" ],
-  "host_permissions": ["<all_urls>"],
+  "permissions": [ "storage", "activeTab" ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/appico16.png",
+      "48": "icons/appico48.png",
+      "128": "icons/appico128.png"
+    }
+  },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
       "js": [
         "enum.js",
+        "blacklist.js",
         "prefetch_manager.js",
         "prefetch_ui.js",
         "settings.js",

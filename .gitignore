@@ -1,0 +1,8 @@
+node_modules/
+
+# Agent working files — never committed
+.claude/
+CLAUDE.md
+*.agent.log
+.worktrees/
+scratch/

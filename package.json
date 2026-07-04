@@ -1,0 +1,15 @@
+{
+  "name": "prefetch-chrome-extension",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Chrome extension for intelligent link prefetching",
+  "license": "LGPL-3.0-or-later",
+  "scripts": {
+    "test": "node --test",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.6.0"
+  }
+}

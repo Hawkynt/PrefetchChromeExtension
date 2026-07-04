@@ -94,6 +94,7 @@
       opacity: 1;
     }
   </style>
+  <script src="./blacklist.js"></script>
   <script src="./settings.js"></script>
 </head>
 <body>
@@ -128,8 +129,8 @@
 
         <label for="scanInterval">Scan Interval (ms):</label>
         <div>
-          <input type="number" id="scanInterval" min="1000" value="3000" />
-          <span class="help-icon" data-tooltip="Interval for scanning new links in milliseconds.">?</span>
+          <input type="number" id="scanInterval" min="0" value="3000" />
+          <span class="help-icon" data-tooltip="Interval for scanning new links in milliseconds; 0 disables periodic scanning.">?</span>
         </div>
         
         <label for="allowQueryPrefetch">Allow Prefetching Query Links:</label>
@@ -185,11 +186,25 @@
           <input type="checkbox" id="boostMouseOverLinks" />
           <span class="help-icon" data-tooltip="Automatically increase priority for links when the mouse hovers over them.">?</span>
         </div>
-        
+
+        <label for="yieldToNavigation">Yield to Navigation:</label>
+        <div>
+          <input type="checkbox" id="yieldToNavigation" />
+          <span class="help-icon" data-tooltip="Cancel all prefetching the moment a link is clicked so the next page loads at full speed.">?</span>
+        </div>
+
       </div>
     </fieldset>
     <fieldset>
       <legend>UI</legend>
+      <div class="grid">
+        <label for="showOverlay">Show Status Overlay:</label>
+        <div>
+          <input type="checkbox" id="showOverlay" />
+          <span class="help-icon" data-tooltip="Display the prefetch status table on pages.">?</span>
+        </div>
+      </div>
+
       <div class="grid">
         <label for="fadeoutDelay">Fadeout Delay (ms):</label>
         <div>
@@ -199,13 +214,17 @@
       </div>
       
       <div class="grid">
-        <label for="fadeoutDelay">Menu Delay (ms):</label>
+        <label for="menuDelay">Menu Delay (ms):</label>
         <div>
           <input type="number" id="menuDelay" min="1000" value="10000" />
           <span class="help-icon" data-tooltip="Delay before hiding the prefetch table after nothing is changed.">?</span>
         </div>
       </div>
       
+    </fieldset>
+    <fieldset>
+      <legend>Disabled Sites</legend>
+      <div id="blacklistContainer"></div>
     </fieldset>
     <div class="grid">
       <button type="submit">Save Settings</button>

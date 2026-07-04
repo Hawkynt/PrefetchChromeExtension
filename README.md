@@ -21,24 +21,30 @@
 
 ## ✨ Features
 
-- **Smart Resource Management**: Dynamically prioritizes resources based on real-time user behavior.
-- **Prefetching Methods**:
-  - DNS Prefetching
-  - Preconnect
-  - Preload
-  - Module Preload
-  - Page Prefetch
-- **Interactive UI**: Displays prefetch statistics and current activities in a responsive UI.
-- **Mouseover Boosting**: Temporarily elevates priority for links hovered over.
-- **Intersection Observer Integration**: Prefetches visible links as they come into the viewport.
-- **Customizable Settings**: Easily configure behaviors like scan intervals, prefetch methods, and connection checks.
+- **Smart Resource Management**: Dynamically prioritizes resources based on real-time user behavior — links get queued at low priority, boosted while visible or hovered, and drop back afterwards.
+- **Prefetching Methods** (each individually switchable):
+  - DNS Prefetching — resolves host names of external links ahead of time
+  - Preconnect — warms up connections for links with query strings
+  - Preload — fetches linked stylesheets and scripts (with the correct `as` type)
+  - Module Preload — fetches linked `.mjs` ES modules
+  - Page Prefetch — fetches same-site pages you are likely to open next
+  - Speculation Rules — uses the browser's native speculation API for page prefetches when supported, falling back to classic prefetch otherwise
+- **Side-Effect Safety**: Links that look like server actions (logout, add-to-cart, subscribe, like, buy, delete, …) are never prefetched, and neither are `rel="nofollow"`, `download`, `data-no-prefetch`, or non-`http(s)` links — speculative loading can't accidentally trigger anything on your behalf. Forms are never touched at all.
+- **Per-Site Disable & Blacklist**: Click the toolbar icon to disable prefetching on the current domain for 5, 30 or 60 minutes — or permanently. Temporary entries re-enable themselves when they expire; the full blacklist is manageable on the options page and syncs across your browsers. An entry covers the domain and all its subdomains, and changes take effect immediately in open tabs.
+- **Mouseover Boosting**: Hovered links (likely clicked next) jump to realtime priority and start prefetching immediately, even when all prefetch slots are busy.
+- **Yields to Navigation**: The moment you click a link, all queued and running prefetches are cancelled so the next page gets the full connection. Modified clicks (new tab/window) and clicks handled by single-page-app routers keep prefetching alive.
+- **Viewport Awareness**: Links entering the viewport are boosted, links scrolling out of view drop back to their previous priority.
+- **Connection Awareness**: Prefetching pauses automatically on slow connections (2G) and while the browser's data-saver mode is active (both optional).
+- **Status Overlay**: An on-page table shows live per-link method, priority and state plus running totals; clicking an entry aborts that prefetch. The hidden overlay never blocks clicks, and it can be turned off entirely.
+- **Concurrency Control**: A configurable number of prefetches run in parallel; hung hints time out so they never clog the queue.
+- **Customizable Settings**: Every behavior above is configurable; settings sync across browsers via `chrome.storage.sync`.
 
 ## 📦 Installation
 
 1. **Download or Clone the Repository**:
 
    ```bash
-   git clone https://github.com/yourusername/prefetch-manager.git
+   git clone https://github.com/Hawkynt/PrefetchChromeExtension.git
    ```
 
 2. **Load the Extension**:
@@ -49,11 +55,44 @@
 3. **Verify Installation**:
    Ensure the extension's icon appears in the browser toolbar.
 
-## How It Works
+## 🧭 Usage
 
-1. **Resource Prioritization**: Resources are prioritized based on user interaction, such as viewport visibility or hover events.
-2. **Queue Management**: The extension manages a priority queue for resources, dynamically updating as user behavior changes.
-3. **Prefetch Execution**: Resources are fetched using appropriate methods, depending on browser capabilities and resource type.
+### Toolbar popup — disable per site
+
+Click the extension icon on any page to open the per-site controls:
+
+- **5 min / 30 min / 60 min**: temporarily disable prefetching for the current domain (and its subdomains); it resumes automatically afterwards.
+- **Forever**: disable the domain permanently.
+- **Re-enable prefetching**: remove the domain from the blacklist again.
+
+Disabling takes effect immediately — running prefetches are cancelled in all open tabs of that site.
+
+### Options page
+
+Right-click the toolbar icon → *Options* (or open it from the extensions page) to configure:
+
+| Setting | Default | Effect |
+|---|---|---|
+| Wait For Page Load | on | Start prefetching only after the page finished loading |
+| Avoid Slow Connections | on | Pause on 2G/slow-2G connections |
+| Avoid Data Saver Mode | on | Pause while the browser's data saver is active |
+| Max Concurrent Prefetchers | 2 | Parallel prefetch limit (hovered links may exceed it) |
+| Scan Interval (ms) | 3000 | How often new links are discovered; 0 disables rescanning |
+| Allow Prefetching Query Links | off | Also consider links with `?query` strings |
+| Enable DNS Prefetch / Prefetch / Preload / Preconnect / Module-Preload / Speculation Rules | on/on/on/on/on/off | Toggle each prefetching method |
+| Boost Priority of In-Viewport Links | on | Prioritize links currently visible |
+| Boost Priority of Mouse-Over Links | on | Instantly prefetch hovered links |
+| Yield to Navigation | on | Cancel everything when a link is clicked |
+| Show Status Overlay | on | Show the on-page status table |
+| Fadeout Delay / Menu Delay (ms) | 5000 / 5000 | How long finished entries and the overlay stay visible |
+| Disabled Sites | – | Review and re-enable blacklisted domains |
+
+## ⚙️ How It Works
+
+1. **Resource Prioritization**: Resources are prioritized based on user interaction, such as viewport visibility or hover events, using a realtime/high/normal/low priority queue.
+2. **Queue Management**: The extension manages a priority queue for resources, dynamically updating as user behavior changes; duplicate hosts collapse into a single DNS/preconnect entry.
+3. **Prefetch Execution**: Resources are fetched using appropriate methods, depending on browser capabilities and resource type — via `<link rel="…">` hints or native speculation rules, never by executing anything.
+4. **Safety Checks**: Before anything is queued, the link must pass the scheme check, the side-effect keyword filter, the anchor opt-outs and the per-site blacklist.
 
 ## ❤️ Support
 

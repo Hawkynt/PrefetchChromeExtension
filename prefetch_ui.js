@@ -3,12 +3,23 @@ class PrefetchUI {
     this.fadeoutDelay = fadeoutDelay;
     this.menuDelay = menuDelay;
     this.tableEntries = {};
+    this.abortRequestedCallbacks = [];
     this.initTable();
+  }
+
+  /**
+   * Subscribe to abort requests (user clicked an entry). The UI never
+   * mutates resources itself; the controller decides what happens.
+   */
+  onAbortRequested(callback) {
+    this.abortRequestedCallbacks.push(callback);
   }
 
   initTable() {
     this.tableContainer = document.createElement("div");
     this.tableContainer.id = "prefetchTable";
+    // pointer-events is toggled with visibility: an invisible overlay
+    // must never swallow clicks meant for the page beneath it.
     this.tableContainer.style.cssText = `
       position: fixed;
       top: 10px;
@@ -22,11 +33,12 @@ class PrefetchUI {
       font-family: Arial, sans-serif;
       font-size: 12px;
       opacity: 0;
+      pointer-events: none;
       transition: opacity 500ms;
       z-index: 9999;
       width: 250px;
     `;
-    
+
     // Add statistics display
     this.statisticsDisplay = document.createElement("div");
     this.statisticsDisplay.style.cssText = `
@@ -34,10 +46,10 @@ class PrefetchUI {
       margin-bottom: 10px;
       font-weight: bold;
     `;
-    
+
     this.updateStatisticsDisplay();
     this.tableContainer.appendChild(this.statisticsDisplay);
-    
+
     document.body.appendChild(this.tableContainer);
   }
 
@@ -49,13 +61,12 @@ class PrefetchUI {
       return acc;
     }, {});
 
-    // Build statistics display dynamically based on State enum
-    this.statisticsDisplay.innerHTML = `
-      L: ${stateCounts[State.LOADING] || 0} |
-      Q: ${stateCounts[State.QUEUED] || 0} |
-      S: ${stateCounts[State.SKIPPED] || 0} |
-      D: ${stateCounts[State.DONE] || 0}
-    `;
+    this.statisticsDisplay.textContent =
+      `L: ${stateCounts[State.LOADING] || 0} | ` +
+      `Q: ${stateCounts[State.QUEUED] || 0} | ` +
+      `S: ${stateCounts[State.SKIPPED] || 0} | ` +
+      `D: ${stateCounts[State.DONE] || 0} | ` +
+      `A: ${stateCounts[State.ABORTED_MANUALLY] || 0}`;
   }
 
   resetFadeoutTimer() {
@@ -64,16 +75,21 @@ class PrefetchUI {
     this.showTable();
   }
 
-  showTable() { this.tableContainer.style.opacity = "1"; }
+  showTable() {
+    this.tableContainer.style.opacity = "1";
+    this.tableContainer.style.pointerEvents = "auto";
+  }
 
-  hideTable() { this.tableContainer.style.opacity = "0"; }
+  hideTable() {
+    this.tableContainer.style.opacity = "0";
+    this.tableContainer.style.pointerEvents = "none";
+  }
 
   updateTableEntry(resource) {
     let entry = this.tableEntries[resource.href];
 
     if (!entry) {
       entry = document.createElement("div");
-      entry.id = `entry-${resource.href}`;
       entry.style.cssText = `
         display: flex;
         justify-content: space-between;
@@ -87,70 +103,93 @@ class PrefetchUI {
       entry.title = resource.href;
       entry.dataset.href = resource.href;
       entry.addEventListener("click", () => {
-        resource.state = State.ABORTED_MANUALLY;
-        this.updateTableEntry(resource);
+        this.abortRequestedCallbacks.forEach((callback) => callback(resource.href));
       });
-      
+
+      const makeCell = (marginLeft) => {
+        const cell = document.createElement("span");
+        if (marginLeft)
+          cell.style.marginLeft = marginLeft;
+        entry.appendChild(cell);
+        return cell;
+      };
+
+      entry.hrefCell = makeCell(null);
+      entry.hrefCell.style.cssText = "flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;";
+      entry.methodCell = makeCell("10px");
+      entry.methodCell.style.color = "#fff";
+      entry.priorityCell = makeCell("10px");
+      entry.stateCell = makeCell("10px");
+
       this.tableContainer.appendChild(entry);
       this.tableEntries[resource.href] = entry;
     }
 
     entry.dataset.state = resource.state;
     entry.dataset.priority = resource.priority;
-    
+
     const priorityColor =
-      resource.priority === Priority.REALTIME ? "White" : 
-      resource.priority === Priority.HIGH ? "Red" : 
-      resource.priority === Priority.NORMAL ? "Lime" : 
+      resource.priority === Priority.REALTIME ? "White" :
+      resource.priority === Priority.HIGH ? "Red" :
+      resource.priority === Priority.NORMAL ? "Lime" :
       resource.priority === Priority.LOW ? "DodgerBlue" :
       "Transparent";
-    
-    const itemColor = 
-      resource.state === State.DONE ? "Gray" : 
+
+    const itemColor =
+      resource.state === State.DONE ? "Gray" :
       resource.state === State.LOADING ? "MediumBlue" :
       resource.state === State.SKIPPED ? "Red" :
       resource.state === State.ABORTED_MANUALLY ? "White" :
       "DarkKhaki";
-      
-    const stateColor = 
-      resource.state === State.DONE ? "Green" : 
+
+    const stateColor =
+      resource.state === State.DONE ? "Green" :
       resource.state === State.LOADING ? "White" :
       resource.state === State.SKIPPED ? "Yellow" :
       resource.state === State.ABORTED_MANUALLY ? "Red" :
       "Black";
 
     entry.style.backgroundColor = itemColor;
-    entry.innerHTML = `
-      <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-        ${resource.href}
-      </span>
-      <span style="margin-left: 10px; color: #fff;">
-        ${resource.method}
-      </span>
-      <span style="margin-left: 10px; color: ${priorityColor}">
-        [${resource.priority}]
-      </span>
-      <span style="margin-left: 10px; color: ${stateColor};">
-        ${resource.state}
-      </span>
-    `;
-        
+    // textContent only: hrefs are page-controlled data, never markup.
+    entry.hrefCell.textContent = resource.href;
+    entry.methodCell.textContent = resource.method;
+    entry.priorityCell.textContent = `[${resource.priority}]`;
+    entry.priorityCell.style.color = priorityColor;
+    entry.stateCell.textContent = resource.state;
+    entry.stateCell.style.color = stateColor;
+
     if ([State.DONE, State.SKIPPED, State.ABORTED_MANUALLY].includes(resource.state))
-      this.fadeoutAndHideEntry(entry);
-    
+      this.fadeoutAndRemoveEntry(resource.href);
+
     this.updateStatisticsDisplay();
     this.resetFadeoutTimer();
   }
-  
-  fadeoutAndHideEntry(entry) {
+
+  removeTableEntry(resource) {
+    const entry = this.tableEntries[resource.href];
+    if (!entry)
+      return;
+
+    delete this.tableEntries[resource.href];
+    if (entry.parentNode)
+      entry.parentNode.removeChild(entry);
+
+    this.updateStatisticsDisplay();
+  }
+
+  fadeoutAndRemoveEntry(href) {
+    const entry = this.tableEntries[href];
+    if (!entry || entry.dataset.fading)
+      return;
+
+    entry.dataset.fading = "true";
     setTimeout(() => {
       entry.addEventListener(
         "transitionend",
-        () => { entry.style.display = "none"; },
+        () => this.removeTableEntry({ href }),
         { once: true }
       );
       entry.style.opacity = "0";
     }, this.fadeoutDelay);
   }
-
 }

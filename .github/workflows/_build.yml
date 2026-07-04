@@ -38,7 +38,7 @@ jobs:
           v="${{ inputs.version }}"
           mkdir -p stage
           # Copy only the files an end user / webstore needs -- exclude repo metadata, tests, etc.
-          cp -r manifest.json *.js *.html icons ReadMe.md LICENSE stage/ 2>/dev/null || true
+          cp -r manifest.json enum.js blacklist.js prefetch_manager.js prefetch_ui.js settings.js content.js options.js options.html popup.js popup.html icons README.md LICENSE stage/
           (cd stage && zip -r "../PrefetchChromeExtension-${v}.zip" .)
           ls -la PrefetchChromeExtension-${v}.zip
 

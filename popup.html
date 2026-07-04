@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Prefetch Extension</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      min-width: 280px;
+      margin: 12px;
+    }
+
+    h1 {
+      font-size: 14px;
+      margin: 0 0 4px;
+      word-break: break-all;
+    }
+
+    #status {
+      margin-bottom: 12px;
+      color: #555;
+    }
+
+    .label {
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background-color: #0078d7;
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #005fa3;
+    }
+
+    #enableAgain {
+      background-color: #2e7d32;
+      width: 100%;
+    }
+
+    #enableAgain:hover {
+      background-color: #1b5e20;
+    }
+  </style>
+  <script src="./blacklist.js"></script>
+  <script src="./settings.js"></script>
+</head>
+<body>
+  <h1 id="hostName">…</h1>
+  <div id="status"></div>
+  <div id="disableControls">
+    <div class="label">Disable prefetching here for:</div>
+    <div class="row">
+      <button id="disable5">5 min</button>
+      <button id="disable30">30 min</button>
+      <button id="disable60">60 min</button>
+      <button id="disablePermanent">Forever</button>
+    </div>
+  </div>
+  <button id="enableAgain">Re-enable prefetching</button>
+  <script src="./popup.js"></script>
+</body>
+</html>

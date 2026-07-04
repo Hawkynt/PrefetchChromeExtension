@@ -9,6 +9,7 @@ const settings = {
     menuDelay: 5000,
     boostInViewportLinks: true,
     boostMouseOverLinks: true,
+    yieldToNavigation: true,
     allowQueryPrefetch: false,
     enableMethodPrefetch: true,
     enableMethodPreload: true,
@@ -16,6 +17,8 @@ const settings = {
     enableMethodDns: true,
     enableMethodModulepreload: true,
     enableSpeculationRules: false,
+    showOverlay: true,
+    blacklist: {},
   },
 
   data: {}, // Stores the current settings
@@ -34,11 +37,33 @@ const settings = {
       // Fallback for localStorage
       this.data = Object.keys(defaults).reduce((acc, key) => {
         const value = localStorage.getItem(key);
-        acc[key] = value !== null ? JSON.parse(value) : defaults[key];
+        try {
+          acc[key] = value !== null ? JSON.parse(value) : defaults[key];
+        } catch {
+          acc[key] = defaults[key];
+        }
         return acc;
       }, {});
     }
     Object.assign(this, this.data); // Expose settings as direct properties
+  },
+
+  // Subscribe to live storage changes (e.g. the popup disabling the
+  // current site); keeps data/properties in sync before notifying.
+  onChanged(callback) {
+    if (typeof chrome === "undefined" || !chrome.storage || !chrome.storage.onChanged)
+      return;
+
+    chrome.storage.onChanged.addListener((changes, areaName) => {
+      if (areaName !== "sync")
+        return;
+
+      Object.entries(changes).forEach(([key, change]) => {
+        this.data[key] = change.newValue;
+        this[key] = change.newValue;
+      });
+      callback(changes);
+    });
   },
 
   // Save current settings to storage

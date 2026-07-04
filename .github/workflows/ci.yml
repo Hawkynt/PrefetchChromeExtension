@@ -19,6 +19,15 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Install dev dependencies
+        run: npm ci
+
+      - name: ESLint
+        run: npx eslint .
+
+      - name: Unit tests
+        run: npm test
+
       - name: Validate manifest.json
         run: |
           node -e '
