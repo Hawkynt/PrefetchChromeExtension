@@ -16,7 +16,5 @@ const State = Object.freeze({
 const Method = Object.freeze({
   DNS: "dns-prefetch",
   PRE_CONNECT: "preconnect",
-  MODULE_PRELOAD: "modulepreload",
-  RESOURCE_PRELOAD: "preload",
   PAGE_PREFETCH: "prefetch",
 });

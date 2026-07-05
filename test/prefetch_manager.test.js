@@ -18,8 +18,6 @@ function makeManager(options = {}, globalOverrides = {}) {
   const env = loadScripts(SCRIPTS, globals);
   const manager = new env.PrefetchManager({
     enableMethodPrefetch: true,
-    enableMethodPreload: true,
-    enableMethodModulepreload: true,
     enableMethodPreconnect: true,
     enableMethodDns: true,
     maxConcurrentPrefetchers: 1,
@@ -131,30 +129,16 @@ describe("side-effect safety", () => {
 });
 
 describe("method selection and prefetch execution", () => {
-  test("given a stylesheet link, when prefetched, then preload carries as=style", async () => {
-    const { manager, env, globals } = makeManager();
-    manager.addOrUpdateResourceEntry("https://example.com/theme.css", env.Method.RESOURCE_PRELOAD, env.Priority.LOW);
-    await flushMicrotasks();
-
-    const link = headLinks(globals)[0];
-    assert.equal(link.rel, "preload");
-    assert.equal(link.as, "style");
-    link.onload();
-  });
-
-  test("given a script link, when prefetched, then preload carries as=script", async () => {
-    const { manager, env, globals } = makeManager();
-    manager.addOrUpdateResourceEntry("https://example.com/app.js", env.Method.RESOURCE_PRELOAD, env.Priority.LOW);
-    await flushMicrotasks();
-
-    const link = headLinks(globals)[0];
-    assert.equal(link.as, "script");
-    link.onload();
-  });
-
-  test("given a .mjs module, when resolving, then modulepreload is chosen", () => {
+  test("given links to script or style files, when resolving, then they are treated as navigations, never as typed preloads", () => {
     const { manager, env } = makeManager();
-    assert.equal(manager.resolveResource("https://example.com/lib.mjs").method, env.Method.MODULE_PRELOAD);
+    // Anchor targets are navigation destinations; preloading them with
+    // an `as` type would be CSP-checked as script/style and poison the
+    // cache with wrong-type entries (a page's CSP blocks foreign script
+    // preloads, and e.g. GitHub blob links serve HTML, not JS).
+    assert.equal(manager.resolveResource("https://example.com/app.js").method, env.Method.PAGE_PREFETCH);
+    assert.equal(manager.resolveResource("https://example.com/theme.css").method, env.Method.PAGE_PREFETCH);
+    assert.equal(manager.resolveResource("https://example.com/lib.mjs").method, env.Method.PAGE_PREFETCH);
+    assert.equal(manager.resolveResource("https://other.example.org/vendor.js").method, env.Method.DNS);
   });
 
   test("given cross-host links, when resolving, then they collapse to one dns entry per origin", () => {

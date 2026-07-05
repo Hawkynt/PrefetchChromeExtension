@@ -1,9 +1,15 @@
 class PrefetchUI {
-  constructor(fadeoutDelay, menuDelay) {
+  constructor(fadeoutDelay, menuDelay, expanded = false) {
     this.fadeoutDelay = fadeoutDelay;
     this.menuDelay = menuDelay;
+    this.expanded = Boolean(expanded);
     this.tableEntries = {};
     this.abortRequestedCallbacks = [];
+    this.expandToggledCallbacks = [];
+    // Cumulative per-page counters for the progress bar: hrefs ever
+    // seen and hrefs that reached a terminal state (or were removed).
+    this.knownHrefs = new Set();
+    this.processedHrefs = new Set();
     this.initTable();
   }
 
@@ -13,6 +19,14 @@ class PrefetchUI {
    */
   onAbortRequested(callback) {
     this.abortRequestedCallbacks.push(callback);
+  }
+
+  /**
+   * Subscribe to expand/collapse toggles so the controller can persist
+   * the state across pages.
+   */
+  onExpandToggled(callback) {
+    this.expandToggledCallbacks.push(callback);
   }
 
   initTable() {
@@ -39,18 +53,72 @@ class PrefetchUI {
       width: 250px;
     `;
 
-    // Add statistics display
+    // Header: expand/collapse indicator plus the statistics summary.
+    this.headerRow = document.createElement("div");
+    this.headerRow.style.cssText = `
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-bottom: 6px;
+    `;
+    this.headerRow.addEventListener("click", () => this.setExpanded(!this.expanded));
+
+    this.toggleIndicator = document.createElement("span");
+
     this.statisticsDisplay = document.createElement("div");
     this.statisticsDisplay.style.cssText = `
+      flex: 1;
       text-align: center;
-      margin-bottom: 10px;
-      font-weight: bold;
     `;
 
+    this.headerRow.appendChild(this.toggleIndicator);
+    this.headerRow.appendChild(this.statisticsDisplay);
+    this.tableContainer.appendChild(this.headerRow);
+
+    // Slim progress bar: processed share of all links found so far.
+    this.progressTrack = document.createElement("div");
+    this.progressTrack.style.cssText = `
+      height: 6px;
+      background: #333;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    `;
+    this.progressFill = document.createElement("div");
+    this.progressFill.style.cssText = `
+      height: 100%;
+      width: 0%;
+      background: Lime;
+      transition: width 300ms;
+    `;
+    this.progressTrack.appendChild(this.progressFill);
+    this.tableContainer.appendChild(this.progressTrack);
+
+    // The detailed queue lives in its own container so collapsing is
+    // just hiding this element; entries keep updating underneath.
+    this.entriesContainer = document.createElement("div");
+    this.tableContainer.appendChild(this.entriesContainer);
+
+    this.applyExpandedState();
     this.updateStatisticsDisplay();
-    this.tableContainer.appendChild(this.statisticsDisplay);
 
     document.body.appendChild(this.tableContainer);
+  }
+
+  setExpanded(expanded) {
+    if (expanded === this.expanded)
+      return;
+
+    this.expanded = expanded;
+    this.applyExpandedState();
+    this.expandToggledCallbacks.forEach((callback) => callback(expanded));
+  }
+
+  applyExpandedState() {
+    this.entriesContainer.style.display = this.expanded ? "" : "none";
+    this.toggleIndicator.textContent = this.expanded ? "▾" : "▸";
   }
 
   updateStatisticsDisplay() {
@@ -67,6 +135,16 @@ class PrefetchUI {
       `S: ${stateCounts[State.SKIPPED] || 0} | ` +
       `D: ${stateCounts[State.DONE] || 0} | ` +
       `A: ${stateCounts[State.ABORTED_MANUALLY] || 0}`;
+
+    this.updateProgressBar();
+  }
+
+  updateProgressBar() {
+    const found = this.knownHrefs.size;
+    const processed = this.processedHrefs.size;
+    const percent = found === 0 ? 0 : Math.round((processed / found) * 100);
+    this.progressFill.style.width = `${percent}%`;
+    this.progressTrack.title = `${processed} / ${found} links processed`;
   }
 
   resetFadeoutTimer() {
@@ -121,9 +199,13 @@ class PrefetchUI {
       entry.priorityCell = makeCell("10px");
       entry.stateCell = makeCell("10px");
 
-      this.tableContainer.appendChild(entry);
+      this.entriesContainer.appendChild(entry);
       this.tableEntries[resource.href] = entry;
     }
+
+    this.knownHrefs.add(resource.href);
+    if ([State.DONE, State.SKIPPED, State.ABORTED_MANUALLY].includes(resource.state))
+      this.processedHrefs.add(resource.href);
 
     entry.dataset.state = resource.state;
     entry.dataset.priority = resource.priority;
@@ -166,6 +248,10 @@ class PrefetchUI {
   }
 
   removeTableEntry(resource) {
+    // A removed link is no longer pending, whatever its state was.
+    if (this.knownHrefs.has(resource.href))
+      this.processedHrefs.add(resource.href);
+
     const entry = this.tableEntries[resource.href];
     if (!entry)
       return;

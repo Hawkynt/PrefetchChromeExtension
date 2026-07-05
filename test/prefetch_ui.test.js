@@ -4,14 +4,14 @@ const { test, describe } = require("node:test");
 const assert = require("node:assert/strict");
 const { makeDocument, loadScripts } = require("./helpers.js");
 
-function makeUI({ fadeoutDelay = 0, menuDelay = 10 } = {}) {
+function makeUI({ fadeoutDelay = 0, menuDelay = 10, expanded = false } = {}) {
   const doc = makeDocument();
   const env = loadScripts(["enum.js", "prefetch_ui.js"], {
     document: doc,
     setTimeout,
     clearTimeout,
   });
-  const ui = new env.PrefetchUI(fadeoutDelay, menuDelay);
+  const ui = new env.PrefetchUI(fadeoutDelay, menuDelay, expanded);
   return { ui, env, doc };
 }
 
@@ -98,5 +98,70 @@ describe("table entries", () => {
     ui.updateTableEntry(makeResource(env, { state: env.State.ABORTED_MANUALLY }));
 
     assert.match(ui.statisticsDisplay.textContent, /A: 1/);
+  });
+});
+
+describe("collapsible queue details", () => {
+  test("given the default state, then the detailed queue is collapsed and entries land in the hidden container", () => {
+    const { ui, env } = makeUI({ fadeoutDelay: 1000 });
+    ui.updateTableEntry(makeResource(env));
+
+    assert.equal(ui.entriesContainer.style.display, "none");
+    assert.equal(ui.tableEntries["https://example.com/x"].parentNode, ui.entriesContainer);
+  });
+
+  test("given a saved expanded state, when constructed with it, then the details are visible", () => {
+    const { ui } = makeUI({ expanded: true });
+    assert.equal(ui.entriesContainer.style.display, "");
+  });
+
+  test("when the header is clicked, then the details toggle and the new state is reported for saving", () => {
+    const { ui } = makeUI();
+    const reported = [];
+    ui.onExpandToggled((expanded) => reported.push(expanded));
+
+    ui.headerRow.dispatchEvent("click");
+    assert.equal(ui.entriesContainer.style.display, "");
+
+    ui.headerRow.dispatchEvent("click");
+    assert.equal(ui.entriesContainer.style.display, "none");
+
+    assert.deepEqual(reported, [true, false]);
+  });
+});
+
+describe("header progress bar", () => {
+  test("given found links, when some finish, then the fill shows the processed share", () => {
+    const { ui, env } = makeUI({ fadeoutDelay: 1000 });
+    ui.updateTableEntry(makeResource(env, { href: "https://example.com/1" }));
+    ui.updateTableEntry(makeResource(env, { href: "https://example.com/2" }));
+    ui.updateTableEntry(makeResource(env, { href: "https://example.com/3" }));
+    assert.equal(ui.progressFill.style.width, "0%");
+
+    ui.updateTableEntry(makeResource(env, { href: "https://example.com/1", state: env.State.DONE }));
+
+    assert.equal(ui.progressFill.style.width, "33%");
+    assert.match(ui.progressTrack.title, /1 \/ 3/);
+  });
+
+  test("given repeated updates of one link, when it walks through its states, then it is counted once", () => {
+    const { ui, env } = makeUI({ fadeoutDelay: 1000 });
+    const href = "https://example.com/walk";
+    ui.updateTableEntry(makeResource(env, { href, state: env.State.QUEUED }));
+    ui.updateTableEntry(makeResource(env, { href, state: env.State.LOADING }));
+    ui.updateTableEntry(makeResource(env, { href, state: env.State.DONE }));
+
+    assert.equal(ui.progressFill.style.width, "100%");
+    assert.match(ui.progressTrack.title, /1 \/ 1/);
+  });
+
+  test("given a queued entry removed by cancellation, then it still counts as processed", () => {
+    const { ui, env } = makeUI({ fadeoutDelay: 1000 });
+    ui.updateTableEntry(makeResource(env, { href: "https://example.com/kept" }));
+    ui.updateTableEntry(makeResource(env, { href: "https://example.com/cancelled" }));
+
+    ui.removeTableEntry({ href: "https://example.com/cancelled" });
+
+    assert.equal(ui.progressFill.style.width, "50%");
   });
 });

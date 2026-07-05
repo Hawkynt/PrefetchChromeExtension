@@ -125,8 +125,6 @@ class PrefetchManager {
     maxConcurrentPrefetchers = 1,
     allowQueryPrefetch = false,
     enableMethodPrefetch = false,
-    enableMethodPreload = false,
-    enableMethodModulepreload = false,
     enableMethodPreconnect = false,
     enableMethodDns = false,
     enableSpeculationRules = false,
@@ -137,8 +135,6 @@ class PrefetchManager {
     this.maxConcurrentPrefetchers = maxConcurrentPrefetchers;
     this.allowQueryPrefetch = allowQueryPrefetch;
     this.enableMethodPrefetch = enableMethodPrefetch;
-    this.enableMethodPreload = enableMethodPreload;
-    this.enableMethodModulepreload = enableMethodModulepreload;
     this.enableMethodPreconnect = enableMethodPreconnect;
     this.enableMethodDns = enableMethodDns;
     this.enableSpeculationRules = enableSpeculationRules;
@@ -263,8 +259,6 @@ class PrefetchManager {
     const settingKey =
       method === Method.DNS ? "enableMethodDns" :
       method === Method.PRE_CONNECT ? "enableMethodPreconnect" :
-      method === Method.MODULE_PRELOAD ? "enableMethodModulepreload" :
-      method === Method.RESOURCE_PRELOAD ? "enableMethodPreload" :
       method === Method.PAGE_PREFETCH ? "enableMethodPrefetch" :
       "none";
 
@@ -294,12 +288,6 @@ class PrefetchManager {
       const link = document.createElement("link");
       link.rel = method;
       link.href = resource.href;
-
-      // A preload without `as` is ignored by the browser (and its load
-      // events may never fire), so derive it from the file extension.
-      if (method === Method.RESOURCE_PRELOAD)
-        link.as = new URL(resource.href).pathname.endsWith(".css") ? "style" : "script";
-
       resource.linkElement = link;
 
       let settled = false;
@@ -469,10 +457,13 @@ class PrefetchManager {
     if (!this.allowQueryPrefetch && url.search)
       return null;
 
+    // Anchor targets are navigation destinations, so they are only ever
+    // warmed as navigations: page prefetch on the same host, connection
+    // hints elsewhere. Never typed preloads (as=script/style) — those
+    // are CSP-checked as script/style loads and would cache the target
+    // with the wrong type (e.g. a link to a .js file usually serves an
+    // HTML viewer page, not the script itself).
     if (url.search) return Method.PRE_CONNECT;
-    if (url.pathname.endsWith(".mjs")) return Method.MODULE_PRELOAD;
-    if (url.pathname.endsWith(".js")) return Method.RESOURCE_PRELOAD;
-    if (url.pathname.endsWith(".css")) return Method.RESOURCE_PRELOAD;
     if (url.hostname === location.hostname) return Method.PAGE_PREFETCH;
     return Method.DNS;
   }

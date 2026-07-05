@@ -12,12 +12,11 @@ const settings = {
     yieldToNavigation: true,
     allowQueryPrefetch: false,
     enableMethodPrefetch: true,
-    enableMethodPreload: true,
     enableMethodPreconnect: true,
     enableMethodDns: true,
-    enableMethodModulepreload: true,
     enableSpeculationRules: false,
     showOverlay: true,
+    overlayExpanded: false,
     blacklist: {},
   },
 

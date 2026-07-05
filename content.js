@@ -8,8 +8,6 @@ async function main() {
     maxConcurrentPrefetchers: settings.maxConcurrentPrefetchers,
     allowQueryPrefetch: settings.allowQueryPrefetch,
     enableMethodPrefetch: settings.enableMethodPrefetch,
-    enableMethodPreload: settings.enableMethodPreload,
-    enableMethodModulepreload: settings.enableMethodModulepreload,
     enableMethodPreconnect: settings.enableMethodPreconnect,
     enableMethodDns: settings.enableMethodDns,
     enableSpeculationRules: settings.enableSpeculationRules,
@@ -17,11 +15,15 @@ async function main() {
 
   // Controller Logic
   if (settings.showOverlay) {
-    const ui = new PrefetchUI(settings.fadeoutDelay, settings.menuDelay);
+    const ui = new PrefetchUI(settings.fadeoutDelay, settings.menuDelay, settings.overlayExpanded);
     manager.onResourceQueued((resource) => ui.updateTableEntry(resource));
     manager.onResourceUpdated((resource) => ui.updateTableEntry(resource));
     manager.onResourceRemoved((resource) => ui.removeTableEntry(resource));
     ui.onAbortRequested((href) => manager.abortResource(href));
+    ui.onExpandToggled((expanded) => {
+      settings.data.overlayExpanded = expanded;
+      settings.save();
+    });
   }
 
   const initializeManager = () => {
