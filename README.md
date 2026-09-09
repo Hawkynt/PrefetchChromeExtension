@@ -19,6 +19,16 @@
 
 > A browser extension that speeds up everyday browsing by intelligently prefetching the pages, scripts and assets you are likely to open next — reducing latency without wasting bandwidth on links you'll never click.
 
+## 🧭 Vision
+
+Browsers already know how to fetch a page before you ask for it; what they lack is judgement about
+*which* page. Prefetch Manager supplies the judgement — it watches what you are actually likely to
+open next and warms only that, so pages feel instant without the extension quietly burning bandwidth
+on every link on the screen.
+
+The line it means not to cross is exactly that one: speculative work is only worth doing while it
+stays cheaper than the wait it removes.
+
 ## ✨ Features
 
 - **Smart Resource Management**: Dynamically prioritizes resources based on real-time user behavior — links get queued at low priority, boosted while visible or hovered, and drop back afterwards.
@@ -55,7 +65,7 @@
 3. **Verify Installation**:
    Ensure the extension's icon appears in the browser toolbar.
 
-## 🧭 Usage
+## 🚀 Quick start
 
 ### Toolbar popup — disable per site
 
@@ -94,6 +104,17 @@ Right-click the toolbar icon → *Options* (or open it from the extensions page)
 2. **Queue Management**: The extension manages a priority queue for resources, dynamically updating as user behavior changes; duplicate hosts collapse into a single DNS/preconnect entry.
 3. **Prefetch Execution**: Resources are fetched using appropriate methods, depending on browser capabilities and resource type — via `<link rel="…">` hints or native speculation rules, never by executing anything.
 4. **Safety Checks**: Before anything is queued, the link must pass the scheme check, the side-effect keyword filter, the anchor opt-outs and the per-site blacklist.
+
+## 🛠️ Building
+
+There is nothing to compile — the extension is loaded from source. What CI runs, and what you should
+run before opening a pull request:
+
+```bash
+npm install
+npm test      # node --test
+npm run lint  # eslint
+```
 
 ## ❤️ Support
 
